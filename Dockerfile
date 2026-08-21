@@ -1,6 +1,6 @@
 FROM php:8.2-cli
 
-# Install dependencies and extensions
+# Install system packages & required extensions
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
@@ -21,7 +21,7 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions for storage & cache
+# Set permissions for Laravel storage
 RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 8080
