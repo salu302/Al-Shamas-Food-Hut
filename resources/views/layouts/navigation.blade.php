@@ -130,7 +130,10 @@
                         <a href="{{ route('register') }}" class="rounded-xl bg-[#FFB703] px-3 py-2 text-center text-sm font-semibold text-[#0D0D0D] hover:bg-yellow-400">Register</a>
                     </div>
                 @else
-                    <a href="{{ route('dashboard') }}" class="mt-1 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold hover:bg-slate-800">Dashboard</a>
+                    <a href="{{ route('profile.edit') }}" class="mt-1 block w-full rounded-xl bg-slate-900 px-3 py-2 text-left text-sm font-semibold hover:bg-slate-800">Profile</a>
+                    @if(in_array(Auth::user()->role, ['owner', 'super_admin', 'admin']))
+                        <a href="{{ route('dashboard') }}" class="mt-1 block w-full rounded-xl bg-slate-900 px-3 py-2 text-left text-sm font-semibold hover:bg-slate-800">Dashboard</a>
+                    @endif
                     <form method="POST" action="{{ route('logout') }}" class="mt-1">
                         @csrf
                         <button type="submit" class="w-full rounded-xl border border-slate-700 px-3 py-2 text-left text-sm font-semibold text-slate-200 hover:bg-slate-900">Logout</button>
