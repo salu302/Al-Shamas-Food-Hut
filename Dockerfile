@@ -1,6 +1,6 @@
 FROM php:8.2-cli
 
-# Install system packages & required extensions
+# Install dependencies, extensions, and Node.js
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     libzip-dev \
+    nodejs \
+    npm \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Get Composer
@@ -19,9 +21,14 @@ WORKDIR /var/www/html
 
 COPY . .
 
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions for Laravel storage
+# Install Node dependencies & compile Vite assets
+RUN npm install
+RUN npm run build
+
+# Set permissions for storage
 RUN chmod -R 777 storage bootstrap/cache
 
 EXPOSE 8080
