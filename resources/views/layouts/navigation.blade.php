@@ -109,7 +109,6 @@
                 <a href="{{ route('complaints.create') }}" class="rounded-xl bg-slate-900 px-3 py-2 text-sm hover:bg-slate-800">Complaints</a>
                 @auth
                     @if(in_array(Auth::user()->role, ['owner', 'super_admin', 'admin']))
-                        <a href="{{ route('dashboard') }}" class="rounded-xl bg-slate-900 px-3 py-2 text-sm hover:bg-slate-800">Dashboard</a>
                         @if(Auth::user()->role === 'owner')
                             <a href="{{ url('/owner/manage-owners') }}" class="rounded-xl bg-slate-900 px-3 py-2 text-sm hover:bg-slate-800">Manage Owners</a>
                         @endif
@@ -125,6 +124,18 @@
                         <a href="{{ route('customer.orders.index') }}" class="rounded-xl bg-slate-900 px-3 py-2 text-sm hover:bg-slate-800">My Orders</a>
                     @endif
                 @endauth
+                @guest
+                    <div class="mt-1 grid grid-cols-2 gap-2">
+                        <a href="{{ route('login') }}" class="rounded-xl bg-slate-900 px-3 py-2 text-center text-sm font-semibold hover:bg-slate-800">Login</a>
+                        <a href="{{ route('register') }}" class="rounded-xl bg-[#FFB703] px-3 py-2 text-center text-sm font-semibold text-[#0D0D0D] hover:bg-yellow-400">Register</a>
+                    </div>
+                @else
+                    <a href="{{ route('dashboard') }}" class="mt-1 rounded-xl bg-slate-900 px-3 py-2 text-sm font-semibold hover:bg-slate-800">Dashboard</a>
+                    <form method="POST" action="{{ route('logout') }}" class="mt-1">
+                        @csrf
+                        <button type="submit" class="w-full rounded-xl border border-slate-700 px-3 py-2 text-left text-sm font-semibold text-slate-200 hover:bg-slate-900">Logout</button>
+                    </form>
+                @endguest
             </div>
         </div>
     </div>

@@ -6,7 +6,7 @@
             <div x-data="{ open: true }" x-show="open" x-transition x-cloak class="bg-[#FFB703] text-[#0D0D0D]">
                 <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
                     <div class="text-center text-sm font-semibold sm:text-left">
-                        TO TRACK YOUR ORDER KINDLY LOG IN / REGISTER
+                        TO TRACK YOUR ORDER KINDLY <a href="{{ route('login') }}" class="underline underline-offset-2 hover:text-white">LOG IN</a> / <a href="{{ route('register') }}" class="underline underline-offset-2 hover:text-white">REGISTER</a>
                         <span class="ml-2">(اپنا آرڈر ٹریک کرنے کے لیے لاگ ان کریں)</span>
                     </div>
                     <button type="button" @click="open = false" class="rounded-full bg-[#111111] px-3 py-1 text-xs font-bold text-white">Close</button>
