@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Item;
 use App\Models\ItemVariant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
@@ -66,9 +67,15 @@ class ItemController extends Controller
             $rules['price'] = ['required', 'numeric', 'min:0'];
         } else {
             $rules['price'] = ['nullable', 'numeric', 'min:0'];
-            $rules['variant_name_en.*'] = ['required', 'string', 'max:255'];
-            $rules['variant_name_ur.*'] = ['required', 'string', 'max:255'];
-            $rules['variant_price.*'] = ['required', 'numeric', 'min:0'];
+            $rules['variant_id'] = ['nullable', 'array'];
+            $rules['variant_id.*'] = ['nullable', 'integer'];
+            $rules['variant_name_en'] = ['nullable', 'array'];
+            $rules['variant_name_en.*'] = ['nullable', 'string', 'max:255'];
+            $rules['variant_name_ur'] = ['nullable', 'array'];
+            $rules['variant_name_ur.*'] = ['nullable', 'string', 'max:255'];
+            $rules['variant_price'] = ['nullable', 'array'];
+            $rules['variant_price.*'] = ['nullable', 'numeric', 'min:0'];
+            $rules['variant_is_available'] = ['nullable', 'array'];
         }
 
         $request->validate($rules);
@@ -151,30 +158,52 @@ class ItemController extends Controller
             $data['image'] = $request->file('image')->store('items', 'public');
         }
 
-        $item->update($data);
+        DB::transaction(function () use ($item, $data, $variantMode, $request) {
+            $item->update($data);
 
-        $item->variants()->delete();
+            if ($variantMode === 'single') {
+                $item->variants()->delete();
 
-        if ($variantMode === 'multiple') {
+                return;
+            }
+
+            $variantIds = $request->input('variant_id', []);
             $variantNames = $request->input('variant_name_en', []);
             $variantNamesUr = $request->input('variant_name_ur', []);
             $variantPrices = $request->input('variant_price', []);
             $variantAvailable = $request->input('variant_is_available', []);
+            $keptVariantIds = [];
 
             foreach ($variantNames as $index => $nameEn) {
-                if (trim($nameEn) === '') {
+                $nameEn = trim((string) $nameEn);
+                $price = $variantPrices[$index] ?? null;
+
+                if ($nameEn === '' || $price === null || $price === '') {
                     continue;
                 }
 
-                ItemVariant::create([
-                    'item_id' => $item->id,
+                $variantId = $variantIds[$index] ?? null;
+                $variant = $variantId
+                    ? $item->variants()->whereKey($variantId)->first()
+                    : null;
+
+                if (! $variant) {
+                    $variant = new ItemVariant(['item_id' => $item->id]);
+                }
+
+                $variant->fill([
                     'name_en' => $nameEn,
-                    'name_ur' => $variantNamesUr[$index] ?? $nameEn,
-                    'price' => $variantPrices[$index] ?? 0,
-                    'is_available' => isset($variantAvailable[$index]) ? true : false,
+                    'name_ur' => trim((string) ($variantNamesUr[$index] ?? '')) ?: $nameEn,
+                    'price' => $price,
+                    'is_available' => isset($variantAvailable[$index]),
                 ]);
+                $variant->item_id = $item->id;
+                $variant->save();
+                $keptVariantIds[] = $variant->id;
             }
-        }
+
+            $item->variants()->whereNotIn('id', $keptVariantIds)->delete();
+        });
 
         return redirect()->route('owner.items.index')->with('success', 'Menu item updated.');
     }

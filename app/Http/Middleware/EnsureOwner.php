@@ -12,7 +12,7 @@ class EnsureOwner
     {
         $user = $request->user();
 
-        if (! $user || $user->role !== 'owner') {
+        if (! $user || ! in_array($user->role, ['owner', 'super_admin'], true)) {
             return Redirect::to('/')->with('error', 'Unauthorized Access');
         }
 

@@ -6,6 +6,7 @@
             $variantData = old('variant_name_en')
                 ? array_map(function ($nameEn, $index) {
                     return [
+                        'id' => old('variant_id')[$index] ?? null,
                         'name_en' => $nameEn,
                         'name_ur' => old('variant_name_ur')[$index] ?? '',
                         'price' => old('variant_price')[$index] ?? '',
@@ -14,6 +15,7 @@
                 }, old('variant_name_en'), array_keys(old('variant_name_en')))
                 : $item->variants->map(function ($variant) {
                     return [
+                        'id' => $variant->id,
                         'name_en' => $variant->name_en,
                         'name_ur' => $variant->name_ur,
                         'price' => number_format($variant->price, 2, '.', ''),
@@ -21,7 +23,7 @@
                     ];
                 })->values();
         @endphp
-        <form action="{{ route('owner.items.update', $item) }}" method="POST" enctype="multipart/form-data" x-data='{ variantMode: @json(old('variant_mode', $item->variants->count() ? 'multiple' : 'single')), variants: @json($variantData) }' class="mt-8 space-y-6">
+        <form action="{{ route('owner.items.update', $item) }}" method="POST" enctype="multipart/form-data" x-data='{ variantMode: @json(old('variant_mode', $item->variants->count() ? 'multiple' : 'single')), variants: @json($variantData), setVariantMode(mode) { this.variantMode = mode; if (mode === "single") this.variants = []; }, addVariant() { this.variants.push({ id: null, name_en: "", name_ur: "", price: "", is_available: true }); }, removeVariant(index) { this.variants.splice(index, 1); } }' class="mt-8 space-y-6">
             @csrf
             @method('PUT')
             <div class="grid gap-4 lg:grid-cols-2">
@@ -43,19 +45,16 @@
                         @endforeach
                     </select>
                 </div>
-                <div>
-                    <label class="mb-2 block text-sm font-semibold text-slate-300">Price</label>
-                    <input name="price" value="{{ old('price', $item->price) }}" class="w-full rounded-3xl border border-slate-800 bg-[#0D0D0D] px-4 py-3 text-white" />
-                </div>
+                <div></div>
             </div>
             <div class="rounded-[32px] bg-[#181818] border border-slate-800 p-4">
                 <div class="flex items-center gap-4 mb-4">
                     <label class="inline-flex items-center gap-2 text-sm text-slate-300">
-                        <input type="radio" name="variant_mode" value="single" x-model="variantMode" class="h-4 w-4 text-[#FFB703] bg-slate-900 rounded">
+                        <input type="radio" name="variant_mode" value="single" x-model="variantMode" @change="setVariantMode('single')" class="h-4 w-4 text-[#FFB703] bg-slate-900 rounded">
                         Single Price
                     </label>
                     <label class="inline-flex items-center gap-2 text-sm text-slate-300">
-                        <input type="radio" name="variant_mode" value="multiple" x-model="variantMode" class="h-4 w-4 text-[#FFB703] bg-slate-900 rounded">
+                        <input type="radio" name="variant_mode" value="multiple" x-model="variantMode" @change="setVariantMode('multiple')" class="h-4 w-4 text-[#FFB703] bg-slate-900 rounded">
                         Multiple Variants
                     </label>
                 </div>
@@ -71,6 +70,7 @@
                     <div class="space-y-4">
                         <template x-for="(variant, index) in variants" :key="index">
                             <div class="grid gap-4 lg:grid-cols-4 items-end">
+                                <input type="hidden" x-model="variant.id" name="variant_id[]">
                                 <div>
                                     <label class="mb-2 block text-sm font-semibold text-slate-300">English Label</label>
                                     <input type="text" x-model="variant.name_en" name="variant_name_en[]" class="w-full rounded-3xl border border-slate-800 bg-[#0D0D0D] px-4 py-3 text-white" />
@@ -83,15 +83,17 @@
                                     <label class="mb-2 block text-sm font-semibold text-slate-300">Price</label>
                                     <input type="text" x-model="variant.price" name="variant_price[]" class="w-full rounded-3xl border border-slate-800 bg-[#0D0D0D] px-4 py-3 text-white" />
                                 </div>
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center justify-between gap-3">
                                     <input type="hidden" :name="`variant_is_available[${index}]`" value="0">
                                     <label class="inline-flex items-center gap-2 text-sm text-slate-300">
                                         <input type="checkbox" :name="`variant_is_available[${index}]`" x-model="variant.is_available" value="1" class="h-4 w-4 text-[#FFB703] bg-slate-900 rounded" />
                                         Active
                                     </label>
+                                    <button type="button" @click="removeVariant(index)" class="text-sm font-semibold text-red-300 hover:text-red-200">Remove</button>
                                 </div>
                             </div>
                         </template>
+                        <button type="button" @click="addVariant()" class="rounded-2xl border border-[#FFB703] px-4 py-2 text-sm font-semibold text-[#FFB703]">+ Add Variant</button>
                     </div>
                 </template>
             </div>

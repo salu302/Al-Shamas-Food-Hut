@@ -13,7 +13,10 @@
                 <div class="rounded-[32px] bg-[#222222] border border-slate-800 p-6">
                     <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <p class="text-sm text-slate-400">Order #{{ $order->id }} · {{ $order->created_at->format('d M Y, H:i') }}</p>
+                            <p class="text-sm text-slate-400">Order #{{ $order->id }} · Placed {{ $order->created_at->timezone('Asia/Karachi')->format('d M Y, h:i A') }}</p>
+                            @if($order->status === 'delivered')
+                                <p class="mt-1 text-sm text-emerald-300">Delivered {{ $order->updated_at->timezone('Asia/Karachi')->format('d M Y, h:i A') }}</p>
+                            @endif
                             <div class="text-lg font-semibold text-white">{{ $order->customer_name }} <span class="text-sm font-normal text-gray-400">· {{ $order->customer_phone }}</span></div>
                             <div class="text-sm text-gray-400">{{ $order->delivery_address }}</div>
                         </div>

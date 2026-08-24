@@ -17,6 +17,7 @@ class DashboardController extends Controller
     public function index()
     {
         $totalOrders = Order::count();
+        $manualSales = Order::where('source', 'whatsapp')->latest()->get();
         $totalRevenue = Order::sum('total_amount');
         $todayRevenue = Order::whereDate('created_at', today())->sum('total_amount');
         $weekRevenue = Order::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total_amount');
@@ -39,7 +40,7 @@ class DashboardController extends Controller
         $complaints = Complaint::latest()->get();
 
         return view('admin.dashboard', compact(
-            'totalOrders', 'totalRevenue', 'owners', 'customers', 'complaints',
+            'totalOrders', 'manualSales', 'totalRevenue', 'owners', 'customers', 'complaints',
             'todayRevenue', 'weekRevenue', 'monthRevenue', 'yearRevenue',
             'todayExpenses', 'weekExpenses', 'monthExpenses', 'yearExpenses',
             'todayProfit', 'weekNetProfit', 'monthProfit', 'yearProfit'

@@ -64,7 +64,7 @@
             @endforeach
         </div>
 
-        @if(Auth::check() && Auth::user()->role === 'owner')
+        @if(Auth::check() && in_array(Auth::user()->role, ['owner', 'admin', 'super_admin']))
             <div class="mt-8 rounded-[32px] border border-slate-800 bg-[#181818] p-6">
                 <div class="mb-5">
                     <p class="text-sm uppercase tracking-[0.24em] text-[#FFB703]">WhatsApp / Manual Sales</p>
@@ -82,6 +82,67 @@
                     </div>
                     <button type="submit" class="rounded-2xl bg-[#FFB703] px-5 py-3 font-semibold text-[#0D0D0D]">Save WhatsApp Sale</button>
                 </form>
+
+                <div class="mt-8 overflow-x-auto rounded-3xl border border-slate-800">
+                    <table class="min-w-full divide-y divide-slate-800 text-left text-sm">
+                        <thead class="bg-[#0D0D0D] text-xs uppercase tracking-[0.16em] text-slate-400">
+                            <tr>
+                                <th class="px-4 py-3 font-semibold">Customer Name</th>
+                                <th class="px-4 py-3 font-semibold">Total Amount</th>
+                                <th class="px-4 py-3 font-semibold">Date/Time</th>
+                                <th class="px-4 py-3 font-semibold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 bg-[#121212] text-slate-300">
+                            @forelse($manualSales as $sale)
+                                <tr x-data="{ editOpen: false }">
+                                    <td class="whitespace-nowrap px-4 py-4 font-medium text-white">{{ $sale->customer_name }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4">Rs. {{ number_format($sale->total_amount, 2) }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4">{{ $sale->created_at->format('d M Y, h:i A') }}</td>
+                                    <td class="whitespace-nowrap px-4 py-4">
+                                        <div class="flex flex-wrap gap-2">
+                                            <button type="button" @click="editOpen = true" class="rounded-xl bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200">Edit</button>
+                                            <form action="{{ route('owner.quick-sale.destroy', $sale) }}" method="POST" onsubmit="return confirm('Delete this sale?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="rounded-xl bg-red-900/60 px-3 py-2 text-xs font-semibold text-red-200">Delete</button>
+                                            </form>
+                                        </div>
+
+                                        <div x-show="editOpen" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" style="display: none;">
+                                            <div class="w-full max-w-md rounded-3xl border border-slate-700 bg-[#181818] p-6 shadow-2xl">
+                                                <div class="flex items-center justify-between gap-4">
+                                                    <h3 class="text-xl font-semibold text-white">Edit WhatsApp Sale</h3>
+                                                    <button type="button" @click="editOpen = false" class="text-2xl text-slate-400" aria-label="Close">&times;</button>
+                                                </div>
+                                                <form action="{{ route('owner.quick-sale.update', $sale) }}" method="POST" class="mt-5 space-y-4">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div>
+                                                        <label for="customer_name_{{ $sale->id }}" class="mb-2 block text-sm font-semibold text-slate-300">Customer name</label>
+                                                        <input id="customer_name_{{ $sale->id }}" name="customer_name" value="{{ $sale->customer_name }}" required class="w-full rounded-2xl border border-slate-700 bg-[#0D0D0D] px-4 py-3 text-white">
+                                                    </div>
+                                                    <div>
+                                                        <label for="total_amount_{{ $sale->id }}" class="mb-2 block text-sm font-semibold text-slate-300">Total amount</label>
+                                                        <input id="total_amount_{{ $sale->id }}" name="total_amount" type="number" min="0.01" step="0.01" value="{{ $sale->total_amount }}" required class="w-full rounded-2xl border border-slate-700 bg-[#0D0D0D] px-4 py-3 text-white">
+                                                    </div>
+                                                    <div class="flex justify-end gap-3">
+                                                        <button type="button" @click="editOpen = false" class="rounded-xl bg-slate-800 px-4 py-2 text-sm text-slate-200">Cancel</button>
+                                                        <button type="submit" class="rounded-xl bg-[#FFB703] px-4 py-2 text-sm font-semibold text-[#0D0D0D]">Save changes</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-4 py-6 text-center text-slate-500">No WhatsApp sales recorded yet.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         @endif
 
