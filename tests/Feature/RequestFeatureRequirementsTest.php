@@ -185,6 +185,60 @@ class RequestFeatureRequirementsTest extends TestCase
         $this->assertDatabaseMissing('expenses', ['id' => $expense->id]);
     }
 
+    public function test_owner_can_delete_order_and_dashboard_excludes_cancelled_revenue(): void
+    {
+        $owner = User::factory()->create(['role' => 'owner']);
+        $this->actingAs($owner);
+
+        $category = Category::create([
+            'name_en' => 'Burgers',
+            'name_ur' => 'برگر',
+            'status' => true,
+        ]);
+        $item = Item::create([
+            'category_id' => $category->id,
+            'name_en' => 'Classic Burger',
+            'name_ur' => 'کلاسک برگر',
+            'description_en' => 'Burger',
+            'description_ur' => 'برگر',
+            'price' => 500,
+            'is_available' => true,
+        ]);
+        $order = Order::create([
+            'customer_name' => 'Delete Me',
+            'customer_phone' => '03001234567',
+            'delivery_address' => 'Address',
+            'total_amount' => 500,
+            'payment_method' => 'COD',
+            'status' => 'pending',
+        ]);
+        OrderItem::create([
+            'order_id' => $order->id,
+            'item_id' => $item->id,
+            'quantity' => 1,
+            'unit_price' => 500,
+            'subtotal' => 500,
+        ]);
+        $cancelledOrder = Order::create([
+            'customer_name' => 'Cancelled',
+            'customer_phone' => '03001234567',
+            'delivery_address' => 'Address',
+            'total_amount' => 200,
+            'payment_method' => 'COD',
+            'status' => 'cancelled',
+        ]);
+
+        $this->get(route('dashboard'))->assertSee('Rs. 500.00');
+        $this->delete(route('owner.orders.destroy', $order))
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+        $this->assertDatabaseMissing('order_items', ['order_id' => $order->id]);
+        $this->get(route('dashboard'))->assertSee('Rs. 0.00');
+        $this->assertDatabaseHas('orders', ['id' => $cancelledOrder->id]);
+    }
+
     public function test_owner_can_visit_deals_management_and_super_admin_can_reset_dashboard(): void
     {
         $owner = User::factory()->create(['role' => 'owner']);

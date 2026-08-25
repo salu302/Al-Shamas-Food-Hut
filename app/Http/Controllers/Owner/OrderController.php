@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -44,5 +45,15 @@ class OrderController extends Controller
         $order->update(['status' => $next]);
 
         return back()->with('success', 'Order status updated.');
+    }
+
+    public function destroy(Order $order)
+    {
+        DB::transaction(function () use ($order) {
+            $order->orderItems()->delete();
+            $order->delete();
+        });
+
+        return back()->with('success', 'Order deleted successfully.');
     }
 }

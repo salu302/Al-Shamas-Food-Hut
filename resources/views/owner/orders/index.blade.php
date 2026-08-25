@@ -47,6 +47,11 @@
                                 @endforeach
                             </div>
                         </form>
+                        <form action="{{ route('owner.orders.destroy', $order) }}" method="POST" class="rounded-3xl bg-red-950/30 p-4 lg:col-span-2">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="rounded-full bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600" onclick="return confirm('Are you sure you want to delete this order? This will remove its revenue from calculations.')">Delete Order</button>
+                        </form>
                     </div>
                 </div>
             @endforeach

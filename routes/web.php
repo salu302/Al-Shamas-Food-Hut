@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/orders', [OwnerOrderController::class, 'index'])->name('orders.index');
         Route::post('/orders/{order}/status', [OwnerOrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::delete('/orders/{order}', [OwnerOrderController::class, 'destroy'])->name('orders.destroy');
         Route::post('/quick-sale', [ManualSaleController::class, 'store'])->name('quick-sale.store');
         Route::put('/quick-sale/{sale}', [ManualSaleController::class, 'update'])->name('quick-sale.update');
         Route::delete('/quick-sale/{sale}', [ManualSaleController::class, 'destroy'])->name('quick-sale.destroy');

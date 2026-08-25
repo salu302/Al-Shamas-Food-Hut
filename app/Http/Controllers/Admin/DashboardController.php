@@ -18,13 +18,18 @@ class DashboardController extends Controller
     {
         $totalOrders = Order::count();
         $manualSales = Order::where('source', 'whatsapp')->latest()->get();
-        $totalRevenue = Order::sum('total_amount');
-        $todayRevenue = Order::whereDate('created_at', today())->sum('total_amount');
-        $weekRevenue = Order::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('total_amount');
-        $monthRevenue = Order::whereMonth('created_at', now()->month)
+        $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total_amount');
+        $todayRevenue = Order::where('status', '!=', 'cancelled')->whereDate('created_at', today())->sum('total_amount');
+        $weekRevenue = Order::where('status', '!=', 'cancelled')
+            ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+            ->sum('total_amount');
+        $monthRevenue = Order::where('status', '!=', 'cancelled')
+            ->whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->sum('total_amount');
+        $yearRevenue = Order::where('status', '!=', 'cancelled')
             ->whereYear('created_at', now()->year)
             ->sum('total_amount');
-        $yearRevenue = Order::whereYear('created_at', now()->year)->sum('total_amount');
         $todayExpenses = Expense::whereDate('expense_date', today())->sum('amount');
         $weekExpenses = Expense::whereBetween('expense_date', [now()->startOfWeek(), now()->endOfWeek()])->sum('amount');
         $monthExpenses = Expense::whereMonth('expense_date', now()->month)
