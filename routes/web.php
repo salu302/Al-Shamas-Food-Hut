@@ -18,7 +18,26 @@ use App\Http\Middleware\EnsureCustomer;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
+// Route::get('/debug-email', function () {
+//     try {
+//         Mail::raw('Test email from Al-Shamas Pizza Hut', function ($message) {
+//             $message->to('sa33766an@gmail.com')
+//                 ->subject('Production Railway SMTP Test');
+//         });
 
+//         return response()->json([
+//             'status' => 'SUCCESS',
+//             'message' => 'Email sent successfully via Brevo!',
+//         ]);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'status' => 'FAILED',
+//             'error_class' => get_class($e),
+//             'error_message' => $e->getMessage(),
+//             'code' => $e->getCode(),
+//         ], 500);
+//     }
+// });
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/locale/{locale}', [HomeController::class, 'switchLocale'])->name('locale.switch');
