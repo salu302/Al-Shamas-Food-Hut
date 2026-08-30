@@ -100,13 +100,16 @@ class CheckoutController extends Controller
         $order->notify($notification);
 
         try {
-            Mail::to(config('mail.from.address', 'owner@example.com'))->send(new OrderConfirmationMail($order));
-            if ($order->customer_email) {
-                Mail::to($order->customer_email)->send(new CustomerOrderConfirmationMail($order));
-            }
-        } catch (\Exception $e) {
-            \Log::error("Email notification failed: " . $e->getMessage());
-        }
+    // 1. Send new order alert directly to the restaurant owner's inbox
+    Mail::to('alisamshaf4@gmail.com')->send(new OrderConfirmationMail($order));
+
+    // 2. Send confirmation to customer if an email was entered during checkout
+    if (!empty($order->customer_email)) {
+        Mail::to($order->customer_email)->send(new CustomerOrderConfirmationMail($order));
+    }
+} catch (\Exception $e) {
+    Log::error("Email notification failed: " . $e->getMessage());
+}
 
         session()->forget('cart');
 
