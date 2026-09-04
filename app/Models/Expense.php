@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
@@ -14,7 +15,7 @@ class Expense extends Model
         'expense_date',
     ];
 
-    public function categoryRecord()
+    public function categoryRecord(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class, 'category_id');
     }

@@ -30,6 +30,25 @@
             @endforeach
         </div>
 
+        <div class="mt-8 rounded-[28px] border border-slate-800 bg-[#181818] p-6">
+            <div class="mb-5">
+                <p class="text-sm uppercase tracking-[0.24em] text-[#FFB703]">Expense Summary</p>
+                <h2 class="mt-2 text-2xl font-semibold text-white">Expenses by Category</h2>
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                @forelse($categories as $category)
+                    <div class="rounded-2xl border border-slate-800 bg-[#0D0D0D] p-4">
+                        <p class="truncate text-sm text-slate-400">{{ $category->name }}</p>
+                        <p class="mt-2 text-xl font-semibold text-white">Rs. {{ number_format($category->expenses_sum_amount ?? 0, 2) }}</p>
+                    </div>
+                @empty
+                    <div class="rounded-2xl border border-dashed border-slate-700 bg-[#0D0D0D] p-4 text-sm text-slate-400 sm:col-span-2 lg:col-span-3">
+                        No expense categories have been created yet.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
         <div class="mt-8 grid gap-8 lg:grid-cols-[360px_1fr]">
             <div class="rounded-[28px] border border-slate-800 bg-[#181818] p-6">
                 <h2 class="text-xl font-semibold text-white">Add expense</h2>

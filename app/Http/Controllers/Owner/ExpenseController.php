@@ -23,7 +23,9 @@ class ExpenseController extends Controller
             ->latest()
             ->get();
 
-        $categories = ExpenseCategory::orderBy('name')->get();
+        $categories = ExpenseCategory::withSum('expenses', 'amount')
+            ->orderBy('name')
+            ->get();
 
         $weekStart = now()->startOfWeek()->toDateString();
         $monthStart = now()->startOfMonth()->toDateString();

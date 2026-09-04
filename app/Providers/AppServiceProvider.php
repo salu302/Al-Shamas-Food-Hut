@@ -38,5 +38,6 @@ class AppServiceProvider extends ServiceProvider
                 Dsn::fromString("brevo+api://{$key}@default")
             );
         });
+
     }
 }
